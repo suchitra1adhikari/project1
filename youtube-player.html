@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #212121;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff0000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            gap: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #121212;
+            border: 1px solid #303030;
+            border-radius: 40px 0 0 40px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #1c62b9;
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: #303030;
+            border: 1px solid #303030;
+            border-left: none;
+            border-radius: 0 40px 40px 0;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #3f3f3f;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-section {
+            background: #181818;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .video-player {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+        }
+
+        .video-player iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .placeholder-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+        }
+
+        .placeholder-message .icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .video-stats {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            background: #181818;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quick-link {
+            padding: 12px 16px;
+            background: #272727;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-link:hover {
+            background: #3f3f3f;
+        }
+
+        .suggested-videos {
+            margin-top: 25px;
+        }
+
+        .suggested-video {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .suggested-video:hover {
+            background: #272727;
+        }
+
+        .suggested-thumb {
+            width: 160px;
+            height: 90px;
+            background: #303030;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .suggested-info {
+            flex: 1;
+        }
+
+        .suggested-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .suggested-channel {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 15px 0;
+            margin-bottom: 15px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background: #272727;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #fff;
+            color: #000;
+        }
+
+        .url-input-section {
+            background: #181818;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #272727;
+            border: 1px solid #3f3f3f;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .url-input:focus {
+            border-color: #1c62b9;
+        }
+
+        .load-btn {
+            padding: 12px 24px;
+            background: #ff0000;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .load-btn:hover {
+            background: #cc0000;
+        }
+
+        .help-text {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #181818;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #303030;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f3f;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            ▶️ YouTube Player
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search YouTube videos...">
+            <button class="search-btn" onclick="searchVideo()">🔍</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="url-input-section">
+            <div class="url-input-group">
+                <input type="text" class="url-input" id="videoUrl" placeholder="Paste YouTube URL here (e.g., https://www.youtube.com/watch?v=VIDEO_ID)">
+                <button class="load-btn" onclick="loadVideo()">▶️ Play Video</button>
+            </div>
+            <div class="help-text">
+                💡 Paste any YouTube video URL or video ID to watch instantly
+            </div>
+        </div>
+
+        <div class="categories">
+            <button class="category-btn active" onclick="loadPopularVideo('music')">🎵 Music</button>
+            <button class="category-btn" onclick="loadPopularVideo('gaming')">🎮 Gaming</button>
+            <button class="category-btn" onclick="loadPopularVideo('news')">📰 News</button>
+            <button class="category-btn" onclick="loadPopularVideo('sports')">⚽ Sports</button>
+            <button class="category-btn" onclick="loadPopularVideo('education')">📚 Education</button>
+            <button class="category-btn" onclick="loadPopularVideo('comedy')">😂 Comedy</button>
+            <button class="category-btn" onclick="loadPopularVideo('tech')">💻 Tech</button>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-player" id="videoPlayerContainer">
+                    <div class="placeholder-message" id="placeholder">
+                        <div class="icon">▶️</div>
+                        <div>Enter a YouTube URL above or search for videos</div>
+                    </div>
+                </div>
+                <div class="video-info" id="videoInfo" style="display: none;">
+                    <div class="video-title" id="videoTitle">Video Title</div>
+                    <div class="video-stats">Ready to watch</div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-title">
+                    ⚡ Quick Access
+                </div>
+                <div class="quick-links">
+                    <button class="quick-link" onclick="loadSpecificVideo('dQw4w9WgXcQ')">
+                        🎵 Popular Music Video
+                    </button>
+                    <button class="quick-link" onclick="loadSpecificVideo('jNQXAC9IVRw')">
+                        🎬 Me at the zoo (First YouTube Video)
+                    </button>
+                    <button class="quick-link" onclick="loadSpecificVideo('9bZkp7q19f0')">
+                        🎤 Gangnam Style
+                    </button>
+                    <button class="quick-link" onclick="loadSpecificVideo('kJQP7kiw5Fk')">
+                        🎸 Luis Fonsi - Despacito
+                    </button>
+                </div>
+
+                <div class="suggested-videos">
+                    <div class="sidebar-title">
+                        📺 Suggested
+                    </div>
+                    <div class="suggested-video" onclick="loadSpecificVideo('L_jWHffIx5E')">
+                        <div class="suggested-thumb">🎬</div>
+                        <div class="suggested-info">
+                            <div class="suggested-title">Smarter Every Day</div>
+                            <div class="suggested-channel">Science & Education</div>
+                        </div>
+                    </div>
+                    <div class="suggested-video" onclick="loadSpecificVideo('OPf0YbXqDm0')">
+                        <div class="suggested-thumb">🎮</div>
+                        <div class="suggested-info">
+                            <div class="suggested-title">Mark Rober</div>
+                            <div class="suggested-channel">Engineering & Fun</div>
+                        </div>
+                    </div>
+                    <div class="suggested-video" onclick="loadSpecificVideo('fC7oUOUEEi4')">
+                        <div class="suggested-thumb">🎵</div>
+                        <div class="suggested-info">
+                            <div class="suggested-title">Billie Eilish - bad guy</div>
+                            <div class="suggested-channel">Music</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+        let playerReady = false;
+
+        function onYouTubeIframeAPIReady() {
+            playerReady = true;
+        }
+
+        function extractYouTubeID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            
+            if (match && match[2].length === 11) {
+                return match[2];
+            }
+            
+            if (url.length === 11 && /^[a-zA-Z0-9_-]+$/.test(url)) {
+                return url;
+            }
+            
+            return null;
+        }
+
+        function loadVideo() {
+            const input = document.getElementById('videoUrl').value.trim();
+            
+            if (!input) {
+                alert('Please enter a YouTube URL or video ID');
+                return;
+            }
+
+            const videoId = extractYouTubeID(input);
+            
+            if (!videoId) {
+                alert('Invalid YouTube URL or video ID');
+                return;
+            }
+
+            loadSpecificVideo(videoId);
+        }
+
+        function loadSpecificVideo(videoId) {
+            const container = document.getElementById('videoPlayerContainer');
+            const placeholder = document.getElementById('placeholder');
+            const videoInfo = document.getElementById('videoInfo');
+            
+            placeholder.style.display = 'none';
+            videoInfo.style.display = 'block';
+            
+            if (player) {
+                player.loadVideoById(videoId);
+            } else {
+                container.innerHTML = '';
+                player = new YT.Player('videoPlayerContainer', {
+                    videoId: videoId,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                        'playsinline': 1,
+                        'autoplay': 1,
+                        'rel': 0,
+                        'modestbranding': 1
+                    },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+        }
+
+        function onPlayerReady(event) {
+            updateVideoTitle();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                updateVideoTitle();
+            }
+        }
+
+        function updateVideoTitle() {
+            if (player && player.getVideoData) {
+                const videoData = player.getVideoData();
+                if (videoData && videoData.title) {
+                    document.getElementById('videoTitle').textContent = videoData.title;
+                }
+            }
+        }
+
+        function searchVideo() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+            }
+        }
+
+        function loadPopularVideo(category) {
+            // Update active category
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Sample popular videos by category
+            const categoryVideos = {
+                'music': 'kJQP7kiw5Fk',
+                'gaming': 'dQw4w9WgXcQ',
+                'news': 'jNQXAC9IVRw',
+                'sports': '9bZkp7q19f0',
+                'education': 'L_jWHffIx5E',
+                'comedy': 'OPf0YbXqDm0',
+                'tech': 'fC7oUOUEEi4'
+            };
+
+            if (categoryVideos[category]) {
+                loadSpecificVideo(categoryVideos[category]);
+            }
+        }
+
+        // Allow Enter key in inputs
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loadVideo();
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchVideo();
+        });
+    </script>
+</body>
+</html>
